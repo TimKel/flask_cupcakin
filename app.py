@@ -17,6 +17,11 @@ db.create_all()
 
 """Flask app for Cupcakes"""
 
+@app.route('/')
+def index_page():
+    cupcake = Cupcake.query.all()
+    return render_template('index.html', cupcake=cupcake)
+
 @app.route('/api/cupcakes')
 def get_cupcakes():
     cupcakes = [cupcake.serialize() for cupcake in Cupcake.query.all()]
@@ -34,7 +39,7 @@ def create_cupcake():
     db.session.commit()
     return (jsonify(cupcake=new_cake.serialize()), 201)
 
-@app.route('/api/cupakes/<int:id>', methods=["PATCH"])
+@app.route('/api/cupcakes/<int:id>', methods=["PATCH"])
 def update_cupcake(id):
     cupcake = Cupcake.query.get_or_404(id)
     cupcake.flavor = request.json.get('flavor', cupcake.flavor)
@@ -43,3 +48,11 @@ def update_cupcake(id):
     cupcake.image = request.json.get('image', cupcake.image)
     db.session.commit()
     return jsonify(cupcake=cupcake.serialize())
+
+@app.route('/api/cupcakes/<int:id>', methods=["DELETE"])
+def delete_cupcake(id):
+    cupcake = Cupcake.query.get_or_404(id)
+
+    db.session.delete(cupcake)
+    db.session.commit()
+    return jsonify(message="Deleted")
